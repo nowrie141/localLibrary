@@ -47,13 +47,13 @@ class BookInstanceAdmin(admin.ModelAdmin):
     # Filter the books for the status or the date
     list_filter = ('status', 'due_back')
     # Configure how the lists will be displayed
-    list_display = ('book', 'status', 'due_back', 'id')
+    list_display = ('book', 'status', 'borrower', 'due_back', 'id')
     # Each section has its own title (or None, if you don't want a title) and an associated tuple of fields in a dictionary
     fieldsets = (
         (None, {
             'fields': ('book', 'imprint', 'id')
         }),
         ('Availability', {
-            'fields': ('status', 'due_back')
+            'fields': ('status', 'due_back', 'borrower')
         }),
     )

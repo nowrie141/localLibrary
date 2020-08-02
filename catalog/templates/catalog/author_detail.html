@@ -14,9 +14,8 @@
         <a href="{{written_book.get_absolute_url}}">{{ written_book.title }}</a>
         ({{ written_book.bookinstance_set.count }})
     </h6>
-    <p> {{written_book.summary}}
-        <p />
+    <p> {{written_book.summary}}</p>
 
-        {% endfor %}
+    {% endfor %}
 </div>
 {% endblock %}

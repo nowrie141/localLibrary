@@ -22,17 +22,15 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('catalog/', include('catalog.urls')),
-]
-
-
-urlpatterns += [
     # Add URL maps to redirect the base URL to our application
     path('', RedirectView.as_view(url='catalog/', permanent=True)),
     # Add the path for the authorization of the users in the system
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts', include('django.contrib.auth.urls')),
+
 ]
 
 # Use static() to add url mapping to serve static files during development (only)
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
