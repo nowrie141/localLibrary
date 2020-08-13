@@ -1,6 +1,4 @@
-{% extends "base_generic.html" %}
-
-{% block content %}
+{% extends "base_generic.html" %} {% block content %}
 
 <h1>Author List</h1>
 <!--If there are any books in the library...-->
@@ -8,19 +6,19 @@
 <ul>
     {% for author in author_list %}
     <li>
-        <a href="{{author.get_absolute_url}}">{{author.last_name}}, {{author.first_name}} (
-            {{author.date_of_birth}},
+        <a href="{{author.get_absolute_url}}">
+            {{author.last_name}}, {{author.first_name}} ( {{author.date_of_birth}},
             {% if author.date_of_death %}
             {{author.date_of_death}}
             {% else %}
             -
-            {% endif %}
-            )</a>
+            {% endif %} )</a>
+        {% if perms.catalog.can_mark_returned %}
+        <a style="float: right;" href="{%url 'author_update' author.id%}">Edit author</a>
+        {% endif %}
     </li>
     {% endfor %}
 </ul>
 {% else %}
-<p>There are no books in the library.</p>
-{% endif %}
-
-{% endblock %}
+<p>There are no authors in the library.</p>
+{% endif %} {% endblock %}

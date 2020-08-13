@@ -4,10 +4,10 @@ from django.urls import reverse_lazy
 from django.shortcuts import render
 from catalog.models import Book, Author, BookInstance, Genre, Language
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 import datetime
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -27,7 +27,7 @@ def index(request):
     num_instances_available = BookInstance.objects.filter(
         status__exact='a').count()
 
-    #All in author is implied
+    # All in author is implied
     num_authors = Author.objects.count()
 
     num_genres = Genre.objects.all().count()
@@ -74,7 +74,7 @@ class LoanedBookByUserListView(LoginRequiredMixin, generic.ListView):
     # List of the books on loan from the current user
     model = BookInstance
     template_name = "catalog/bookinstance_list_borrowed_user.html"
-    paginate_by = 10
+    paginate_by = 5
 
     def get_queryset(self):
         return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
@@ -84,13 +84,14 @@ class AllLoanedBookListView(LoginRequiredMixin, generic.ListView):
     # List of the books on loan from the current user
     model = BookInstance
     template_name = "catalog/bookinstance_list_borrowed_all.html"
-    paginate_by = 10
+    paginate_by = 5
 
     def get_queryset(self):
         return BookInstance.objects.filter(status__exact='o').order_by('due_back')
 
 
-@permission_required('catalog.can_mark_returned')
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
 def renew_book_librarian(request, pk):
     # View function for renewing a bookinstance
     book_instance = get_object_or_404(BookInstance, pk=pk)
@@ -114,33 +115,39 @@ def renew_book_librarian(request, pk):
     return render(request, 'catalog/book_renew_librarian.html', context)
 
 
-class AuthorCreate(CreateView):
+class AuthorCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'catalog.can_mark_returned'
     model = Author
     fields = '__all__'
     initial = {'date_of_death': '05/01/2018'}
 
 
-class AuthorUpdate(UpdateView):
+class AuthorUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'catalog.can_mark_returned'
     model = Author
     fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
 
 
-class AuthorDelete(DeleteView):
+class AuthorDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'catalog.can_mark_returned'
     model = Author
     success_url = reverse_lazy('authors')
 
 
 # Book creating, update and delete
-class BookCreate(CreateView):
+class BookCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'catalog.can_mark_returned'
     model = Book
     fields = '__all__'
 
 
-class BookUpdate(UpdateView):
+class BookUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'catalog.can_mark_returned'
     model = Book
     fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
 
 
-class BookDelete(DeleteView):
+class BookDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'catalog.can_mark_returned'
     model = Book
     success_url = reverse_lazy('books')
