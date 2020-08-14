@@ -44,21 +44,6 @@ class AuthorListViewTest(TestCase):
         self.assertTrue(len(response.context['author_list']) == 5)
 
 
-class CreateAuthorViewTest(TestCase):
-    def setUp(self):
-        test_user1 = User.objects.create_user(
-            username='testuser1', password='1X<ISRUkw+tuK')
-        test_user2 = User.objects.create_user(
-            username='testuser2', password='2HJ1vRV0Z&3iD')
-        test_user1.save()
-        test_user2.save()
-
-        # Give them permission
-        permission = Permission.objects.get(name='Set book as returned')
-        test_user2.user_permissions.add(permission)
-        test_user2.save()
-
-
 class LoanedBookInstancesByUserListViewTest(TestCase):
     def setUp(self):
         test_user1 = User.objects.create_user(
@@ -408,3 +393,94 @@ class RenewBookInstancesViewTest(TestCase):
             'renewal_date',
             'Invalid date - renewal more than 4 weeks ahead'
         )
+
+
+class CreateAuthorViewTest(TestCase):
+    def setUp(self):
+        test_user1 = User.objects.create_user(
+            username='testuser1', password='1X<ISRUkw+tuK')
+        test_user2 = User.objects.create_user(
+            username='testuser2', password='2HJ1vRV0Z&3iD')
+        test_user1.save()
+        test_user2.save()
+
+        # Give them permission
+        permission = Permission.objects.get(name='Set book as returned')
+        test_user2.user_permissions.add(permission)
+        test_user2.save()
+
+    def test_redirect_if_not_logged_in(self):
+        response = self.client.get(
+            reverse('author_create')
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_redirect_if_logged_in_but_not_correct_permission(self):
+        login = self.client.login(
+            username='testuser1',
+            password='1X<ISRUkw+tuK'
+        )
+        response = self.client.get(
+            reverse('author_create')
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_logged_in_with_permission_author_create(self):
+        login = self.client.login(
+            username='testuser2',
+            password='2HJ1vRV0Z&3iD'
+        )
+        response = self.client.get(
+            reverse('author_create')
+        )
+        # Check that it lets us login and create a new author.
+        self.assertEqual(response.status_code, 200)
+
+    def test_form_date_initially_is_today(self):
+        login = self.client.login(
+            username='testuser2',
+            password='2HJ1vRV0Z&3iD'
+        )
+        response = self.client.get(
+            reverse('author_create')
+        )
+        self.assertEqual(response.status_code, 200)
+        date_today = datetime.date.today()
+        self.assertEqual(
+            response.context['form'].initial['date_of_death'], date_today
+        )
+
+    def test_redirects_to_created_author_on_success(self):
+        login = self.client.login(
+            username='testuser2',
+            password='2HJ1vRV0Z&3iD'
+        )
+        date_in_past = datetime.date.today() - datetime.timedelta(weeks=2)
+        date_in_future = datetime.date.today() + datetime.timedelta(weeks=2)
+        response = self.client.post(
+            reverse('author_create'),
+            {
+                'first_name': 'testName',
+                'last_name': 'testLastName',
+                'date_of_birth': date_in_past,
+                'date_of_death': date_in_future,
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/catalog/author/'))
+
+    def test_logged_in_uses_correct_template(self):
+        login = self.client.login(
+            username='testuser2', password='2HJ1vRV0Z&3iD')
+        response = self.client.get(reverse('author_create'))
+
+        # Check that the user is actually logged in
+        self.assertEqual(str(response.context['user']), 'testuser2')
+
+        # Check that we got the correct response with success
+        self.assertEqual(response.status_code, 200)
+
+        # Check the correct templated is being used
+        self.assertTemplateUsed(
+            response, 'catalog/author_form.html')
