@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import dj_database_url
-import django_heroku
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -152,5 +151,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Makes the connection persistent, which is far more efficient than recreating the connection on every request cycle
 """db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)"""
-
-django_heroku.settings(locals())
