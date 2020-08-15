@@ -149,5 +149,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Heroku: Update database configuration from $DATABASE_URL.
 
 # Makes the connection persistent, which is far more efficient than recreating the connection on every request cycle
-"""db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)"""
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
