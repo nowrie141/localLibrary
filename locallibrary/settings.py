@@ -46,7 +46,7 @@ SECRET_KEY = 't2b@o_#%$hhx##%l10oy6w8763q$c$-tlior7xuwb$os97(m_('
 DEBUG = False
 
 #ALLOWED_HOSTS = ['<your app URL without the https:// prefix>.herokuapp.com','127.0.0.1']
-ALLOWED_HOSTS = ['infinite-island-17343.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['django--library.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
